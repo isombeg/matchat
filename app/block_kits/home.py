@@ -88,20 +88,15 @@ def uncreated_profile_home(slack_id):
                     }
                 },
                 {
-                    "type": "actions",
+                    "type": "button",
                     "block_id": BLOCK_ID_CREATE_PROFILE,
-                    "elements": [
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "Create Profile",
-                                "emoji": True
-                            },
-                            "value": "click_me_123",
-                            "action_id": ACTION_ID_EDIT_PROFILE
-                        }
-                    ]
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Create Profile",
+                        "emoji": True
+                    },
+                    "value": "click_me_123",
+                    "action_id": ACTION_ID_EDIT_PROFILE
                 }
             ]
         }
