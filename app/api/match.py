@@ -8,6 +8,8 @@ from slack_sdk.errors import SlackApiError
 
 from app.utils.constants import ATLAS_CONNECTION_STR, SLACK_BOT_TOKEN
 
+from app.utils.constants import ATLAS_CONNECTION_STR
+
 match_bp = Blueprint('match', __name__)
 
 # TODO: check if ppl are on same team

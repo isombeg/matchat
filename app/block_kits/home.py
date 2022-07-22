@@ -1,10 +1,11 @@
 from app.models.profile import Profile
-from app.utils.constants import SLACK_USER_ID, SLACK_BOT_TOKEN
+from app.utils.constants import SLACK_USER_ID, SLACK_BOT_TOKEN, ACTION_ID_EDIT_PROFILE, BLOCK_ID_CREATE_PROFILE
+
 
 def created_profile_home(profile : Profile):
     return {
         "token": SLACK_BOT_TOKEN,
-        "user_id": SLACK_USER_ID,
+        "user_id": profile.slack_id,
         "view": {
             "type": "home",
             "blocks": [
@@ -56,28 +57,57 @@ def created_profile_home(profile : Profile):
 }
     
 
-def uncreated_profile_home(slack_id): 
+def uncreated_profile_home(slack_id):
     return {
         "token": SLACK_BOT_TOKEN,
         "user_id": slack_id,
         "view": {
             "type": "home",
+            # "title": {
+            #     "type": "plain_text",
+            #     "text": "Create Profile"
+            # },
             "blocks": [
                 {
-                    "type": "actions",
-                    "elements": [
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "Create Profile",
-                                "emoji": True
-                            },
-                            "value": "click_me_123",
-                            "action_id": "actionId-0"
-                        }
-                    ]
-                }
+                    "type": "divider"
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "It looks like you don't have a MatchaT profile yet!\n\nCreate a profile to get matched."
+                    },
+                    # "accessory": {
+                    #     "type": "image",
+                    #     "image_url": "https://pbs.twimg.com/profile_images/625633822235693056/lNGUneLX_400x400.jpg",
+                    #     "alt_text": "cute cat"
+                    # }
+                    "accessory": {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Create Profile",
+                            "emoji": True
+                        },
+                        "action_id": ACTION_ID_EDIT_PROFILE
+                    }
+                },
+                # {
+                #     "type": "actions",
+                #     "block_id": BLOCK_ID_CREATE_PROFILE,
+                #     "elements": [
+                #         {
+                #             "type": "button",
+                #             "text": {
+                #                 "type": "plain_text",
+                #                 "text": "Create Profile",
+                #                 "emoji": True
+                #             },
+                #             "value": "click_me_123",
+                #             "action_id": ACTION_ID_EDIT_PROFILE
+                #         }
+                #     ]
+                # }
             ]
         }
-}
+    }

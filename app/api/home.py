@@ -37,7 +37,10 @@ def send_home_view(slack_id):
         print("get_profile_handler: user is not yet registed")
         response = requests.post(
             f"{SLACK_API_URL}{API_VIEWS_PUBLISH}",
-            headers={"Authorization": f"Bearer {SLACK_BOT_TOKEN}"},
+            headers={
+                "Authorization": f"Bearer {SLACK_BOT_TOKEN}",
+                "Content-Type": "application/json"
+            },
             json=uncreated_profile_home(slack_id)
         )
     
@@ -45,13 +48,16 @@ def send_home_view(slack_id):
         print("send_home_view: user is registered")
         response = requests.post(
             f"{SLACK_API_URL}{API_VIEWS_PUBLISH}",
-            headers={"Authorization": f"Bearer {SLACK_BOT_TOKEN}"},
+            headers={
+                "Authorization": f"Bearer {SLACK_BOT_TOKEN}",
+                "Content-Type": "application/json"
+            },
             json=created_profile_home(
                 Profile(
                     slack_id=slack_id,
                     name = profile_doc["name"],
                     is_intern = profile_doc["is_intern"],
-                    team_id = profile_doc["team_id"],
+                    team_id = profile_doc["team"],
                     prefers_interns = profile_doc["prefers"]["interns"],
                     prefers_ftes = profile_doc["prefers"]["ftes"],
                     is_active = profile_doc["is_active"],
