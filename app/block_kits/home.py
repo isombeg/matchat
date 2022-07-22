@@ -62,11 +62,11 @@ def uncreated_profile_home(slack_id):
         "token": SLACK_BOT_TOKEN,
         "user_id": slack_id,
         "view": {
-            "type": "home",
-            "title": {
-                "type": "plain_text",
-                "text": "Create Profile"
-            },
+            # "type": "home",
+            # "title": {
+            #     "type": "plain_text",
+            #     "text": "Create Profile"
+            # },
             "blocks": [
                 {
                     "type": "divider"
@@ -89,7 +89,6 @@ def uncreated_profile_home(slack_id):
                             "text": "Create Profile",
                             "emoji": True
                         },
-                        "value": "click_me_123",
                         "action_id": ACTION_ID_EDIT_PROFILE
                     }
                 },
@@ -111,4 +110,4 @@ def uncreated_profile_home(slack_id):
                 # }
             ]
         }
-}
+    }
