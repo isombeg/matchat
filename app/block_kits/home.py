@@ -62,7 +62,7 @@ def uncreated_profile_home(slack_id):
         "token": SLACK_BOT_TOKEN,
         "user_id": slack_id,
         "view": {
-            # "type": "home",
+            "type": "home",
             # "title": {
             #     "type": "plain_text",
             #     "text": "Create Profile"
