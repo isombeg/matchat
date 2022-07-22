@@ -1,8 +1,12 @@
+from pydoc import cli
 from flask import Blueprint, jsonify
-from os import environ
 import pymongo
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import maximum_bipartite_matching
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
+
+from app.utils.constants import ATLAS_CONNECTION_STR, SLACK_BOT_TOKEN
 
 from app.utils.constants import ATLAS_CONNECTION_STR
 
@@ -18,15 +22,17 @@ def match():
     matching = maximum_bipartite_matching(graph, perm_type='column')
     
     matches = {}
+    no_match_interns = []
     for i in range(len(matching)):
         if matching[i] >= 0:
             matches[mapping_interns[i]] = mapping_ftes[matching[i]]
         else:
-            continue
+            no_match_interns.append(mapping_interns[i])
 
     print(matches)
-
-    process_matches(matches, {}, client)
+    no_match_ftes = [mapping_ftes[i] for i in set(mapping_ftes.keys()).difference(set(matching))]
+    no_matches = no_match_interns + no_match_ftes
+    process_matches(matches, no_matches, client)
 
     return jsonify(success=True, status_code=200)
 
@@ -99,6 +105,8 @@ def process_matches(matches, no_matches, client):
     db = pymongo.database.Database(client, 'matchat')
     profiles = db['profiles']
 
+    slack_client = WebClient(token=SLACK_BOT_TOKEN)
+
     # add matches to met_with field in MongoDB
     for intern in matches:
         profiles.update_one(
@@ -111,9 +119,58 @@ def process_matches(matches, no_matches, client):
             {'$push': {'met_with': intern}}
         )
 
-    # TODO: send notifications to matches
-    # TODO: send notifications to non matches
+    # send notifications to matches
+    for k, v in matches.items():
+        m1 = profiles.find_one({"_id": k}, projection=["slack_id"])
+        m2 = profiles.find_one({"_id": v}, projection=["slack_id"])
+        send_match_notification(m1['slack_id'], m2['slack_id'], slack_client)
+        
+    # send notifications to non matches
+    for k in no_matches:
+        m = profiles.find_one({"_id": k}, projection=["slack_id"])
+        send_no_match_notification(m['slack_id'], slack_client)
 
+def send_match_notification(user_slack_id, user_matched_with_slack_id, slack_client):
+    try:
+        slack_client.chat_postMessage(
+            channel=user_slack_id,
+            text="You got a match!",
+            blocks=match_message_block(user_matched_with_slack_id)
+        )
+    except SlackApiError:
+        jsonify(success=False, status_code=500)
+
+def send_no_match_notification(user_slack_id, slack_client):
+    try:
+        slack_client.chat_postMessage(
+            channel=user_slack_id,
+            text="You did not get a match this week.",
+            blocks=no_match_message_block()
+        )
+    except SlackApiError:
+        jsonify(success=False, status_code=500)
+
+def match_message_block(user_matched_with):
+    return [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": ":tada: You've been matched with <@{match_id}>! Go ahead and send them a message to schedule a chat.".format(match_id = user_matched_with)
+            }
+        }
+    ]
+
+def no_match_message_block():
+    return [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "Unfortunately, you did not get a match for this week."
+            }
+        }
+    ]
 
 """
 Prints out the names of everyone who was paired up. For development purposes only.
