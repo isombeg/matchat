@@ -121,24 +121,21 @@ def process_matches(matches, no_matches, client):
 
     # send notifications to matches
     users_list = slack_client.users_list()['members']
-    all_users = {}
-    for user in users_list:
-        all_users[user['id']] = user
 
     for k, v in matches.items():
         m1 = profiles.find_one({"_id": k}, projection=["slack_id"])
         m2 = profiles.find_one({"_id": v}, projection=["slack_id"])
-        send_match_notification(m1, m2, all_users, slack_client)
+        send_match_notification(m1, m2, slack_client)
         
     # send notifications to non matches
     for k in no_matches:
         m = profiles.find_one({"_id": k}, projection=["slack_id"])
-        send_no_match_notification(m['slack_id'], all_users, slack_client)
+        send_no_match_notification(m['slack_id'], slack_client)
 
-def send_match_notification(user_slack_id, user_matched_with_slack_id, all_users, slack_client):
+def send_match_notification(user_slack_id, user_matched_with_slack_id, slack_client):
     try:
         slack_client.chat_postMessage(
-            channel=all_users[user_slack_id],
+            channel=user_slack_id,
             text="You got a match!",
             blocks=match_message_block(user_matched_with_slack_id)
         )
