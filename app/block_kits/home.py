@@ -5,7 +5,7 @@ from app.utils.constants import SLACK_USER_ID, SLACK_BOT_TOKEN, ACTION_ID_EDIT_P
 def created_profile_home(profile : Profile):
     return {
         "token": SLACK_BOT_TOKEN,
-        "user_id": SLACK_USER_ID,
+        "user_id": profile.slack_id,
         "view": {
             "type": "home",
             "blocks": [
