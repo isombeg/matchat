@@ -39,7 +39,6 @@ def post_profile_handler(request):
 
     return Response(status=200)
 
-# Handler when user updates profile, TODO: this
 def update_profile(profile):
     profiles_coll = mongo_client.matchat.profiles
     profile_doc = profiles_coll.find_one(profile.slack_id)
@@ -77,6 +76,7 @@ def member_joined_channel_handler(request):
     slack_id = json_body["user"]
     slack_channel = json_body["channel"]
 
+    print("member_joined_channel")
     if slack_channel == "C03QS45D1E0":
         thread_send_create_profile = Thread(
             target=send_create_profile,
@@ -95,7 +95,7 @@ def send_create_profile(slack_id):
 
     response = None
 
-    print("get_profile_handler: user is not yet registed")
+    print("send_create_profile: user is not yet registed")
     
     try:
         slack_client.chat_postMessage(
