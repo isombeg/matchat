@@ -66,6 +66,22 @@ def profile_view_handler(request):
     
     return Response(status=200)
 
+def member_joined_channel_handler(request):
+    json_body = request.json
+    slack_id = json_body["user"]
+    slack_channel = json_body["channel"]
+
+    if slack_channel == "C03QS45D1E0":
+        thread_send_home_view = Thread(
+            target=send_home_view,
+            kwargs={
+                "slack_id": slack_id
+            }
+        )
+        thread_send_home_view.start()
+
+    return Response(status=200)
+
 def send_profile_form(trigger_id):
     request_body = {
         "trigger_id": trigger_id,
