@@ -57,7 +57,7 @@ def send_home_view(slack_id):
                     slack_id=slack_id,
                     name = profile_doc["name"],
                     is_intern = profile_doc["is_intern"],
-                    team_id = profile_doc["team_id"],
+                    team_id = profile_doc["team"],
                     prefers_interns = profile_doc["prefers"]["interns"],
                     prefers_ftes = profile_doc["prefers"]["ftes"],
                     is_active = profile_doc["is_active"],
