@@ -120,12 +120,10 @@ def process_matches(matches, no_matches, client):
         )
 
     # send notifications to matches
-    users_list = slack_client.users_list()['members']
-
     for k, v in matches.items():
         m1 = profiles.find_one({"_id": k}, projection=["slack_id"])
         m2 = profiles.find_one({"_id": v}, projection=["slack_id"])
-        send_match_notification(m1, m2, slack_client)
+        send_match_notification(m1['slack_id'], m2['slack_id'], slack_client)
         
     # send notifications to non matches
     for k in no_matches:
