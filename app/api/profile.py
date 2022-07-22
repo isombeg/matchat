@@ -1,16 +1,22 @@
 from threading import Thread
-from flask import request, Blueprint, Response, json
+from flask import request, Blueprint, Response, json, jsonify
 from os import environ
 import requests
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
+
 from app.block_kits.profile import PROFILE_MODAL_DICT
+from app.block_kits.home import uncreated_profile_home
 from app.models.profile import Profile
 from pymongo import MongoClient
 from app.utils.constants import SLACK_BOT_TOKEN
+from app.api.home import send_home_view
 
 SLACK_API_URL = environ.get("SLACK_API_URL")
 ATLAS_CONNECTION_STR = environ.get("ATLAS_CONNECTION_STR")
 
 mongo_client = MongoClient(ATLAS_CONNECTION_STR)
+slack_client = WebClient(token=SLACK_BOT_TOKEN)
 
 def post_profile_handler(request):
     json_body = request.json
@@ -72,15 +78,35 @@ def member_joined_channel_handler(request):
     slack_channel = json_body["channel"]
 
     if slack_channel == "C03QS45D1E0":
-        thread_send_home_view = Thread(
-            target=send_home_view,
+        thread_send_create_profile = Thread(
+            target=send_create_profile,
             kwargs={
                 "slack_id": slack_id
             }
         )
-        thread_send_home_view.start()
+        thread_send_create_profile.start()
 
     return Response(status=200)
+
+def send_create_profile(slack_id):
+    # extract user profile from coll
+    profiles_coll = mongo_client.matchat.profiles
+    profile_doc = profiles_coll.find_one({"slack_id": slack_id})
+
+    response = None
+
+    print("get_profile_handler: user is not yet registed")
+    
+    try:
+        slack_client.chat_postMessage(
+            channel=slack_id,
+            text="Create a new profile.",
+            blocks=uncreated_profile_home(slack_id)["view"]
+        )
+    except SlackApiError:
+        print("rip")
+        # jsonify(success=False, status_code=500)
+    
 
 def send_profile_form(trigger_id):
     request_body = {
